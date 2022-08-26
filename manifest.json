@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Easier Affinitiv",
+  "description": "Aids with making Affinitive more efficent for Technicians.",
+  "host_permissions": ["*://*.autoloop.us/dms/app/Schedule/MPI/Inspection/*"],
+  "version": "1.0.0",
+  "permissions": ["activeTab", "tabs", "scripting", "storage"],
+  "content_scripts":[
+    {
+      "matches": ["*://*.autoloop.us/dms/app/Schedule/MPI/Inspection/*"],
+      "js": ["jquery-3.6.0.min.js","content.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+    "resources": ["inject.js"],
+    "matches": ["<all_urls>"]
+    }
+  ],
+  "action":{
+    "default_popup": "popup.html",
+    "default_title":"Easier Affivitiv"
+  }
+}
