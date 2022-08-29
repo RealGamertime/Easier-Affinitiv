@@ -40,9 +40,9 @@ chrome.runtime.onConnect.addListener(function(port) {
     sendResponse({toggle:skipped});
   }
 });*/
-/*(()=>{
-  chrome
-})();*/
+var techSelectionClass = $('#technicianSelect');
+retrieveSettings();
+main();
 const settings={
 	'selectedTech': null,
 	'warnUser': true,
@@ -71,36 +71,47 @@ function retrieveSettings(){
     }
 });
 }
-retrieveSettings();
-main();
+
+function updateSetting(settingKey, data){
+  if(Array.toString(settings[settingKey]) != Array.toString(data))
+  {
+    settings[settingKey] = data;
+    chrome.storage.sync.set(settings);
+    console.info(`Setting: ${settingKey} updated with new data.`);
+  }
+}
+
 async function main(){
   //chrome.storage.sync.clear();
   await waitForPageLoad();
-  
-  var techs = getAllTechnicians(document.documentElement.outerHTML);
+  var techs = getAllTechnicians();
+  updateSetting("availTechs", techs);
   console.log(settings.selectedTech);
   //alert(techs);
   if(techs.includes(settings.selectedTech)){
     //alert(settings.selectedTech + " is available");
-    var techSelectionClass = $('#technicianSelect');
-    if(techSelectionClass[0].selectedOptions[0].innerText=="" || techSelectionClass[0].selectedOptions[0].innerText=="NOTAPPLICABLE")
+    
+    var techValue = techSelectionClass[0].selectedOptions[0].innerText;
+    if(techValue=="" || techValue=="NOTAPPLICABLE")
     {
       var availTechs = techSelectionClass.children();
       availTechs.each((index, tech)=>{
         if(tech.innerHTML == settings.selectedTech)
         {
-          $('#technicianSelect').get(0).selectedIndex = index;
+          techSelectionClass.get(0).selectedIndex = index;
         }
       });
-    }
+    } 
     
 
   }
   else{
     console.warn(`Selected Technician; ${settings.selectedTech} does not exist.`);
   }
+	
   inject();
 }
+//var scheduledServices = document.getElementById("scheduled-services");
 
 async function waitForPageLoad(){
   //alert("Waiting for ajaxspinner to load");
@@ -114,28 +125,25 @@ async function waitForPageLoad(){
   //await new Promise((resolve, reject) => setTimeout(resolve, 500));
 }
 function getAllTechnicians(htmlString){
-  var techs = htmlString.split(`<select name="technicianSelect"`)[1];
-  techs = techs.slice(techs.indexOf('>')+1, techs.indexOf("</select>"));
-  techs = techs.split(`<option label="`);
-  return techs.filter(tech=>{return tech.length> 5})
-  .map(tech=>{return tech.split(`\" value`)[0]});
+  var techs = [];
+  for(var tech of techSelectionClass[0].children){
+    var name = tech.innerText;
+    if(!(name=="" || name=="NOTAPPLICABLE")){
+      techs.push(tech.innerText);
+    }
+  };
+  return techs;
 }
 
 function inject(){
   var s = document.createElement('script');
-  
   s.src = chrome.runtime.getURL('./inject.js');
-  
   s.onload = function() {
     var data = {
       warnUser: settings.warnUser
     };
-    
     document.dispatchEvent(new CustomEvent('info', { detail: data }));
     this.remove();
   };
-  
   (document.body || document.head || document.documentElement).appendChild(s);
-  
-  
 }

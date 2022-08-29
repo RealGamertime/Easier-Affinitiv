@@ -19,3 +19,21 @@ document.addEventListener('info', function (e) {
   }
   $('#technicianSelect').change();
 });
+
+var scheduledServices = document.getElementById("scheduled-services");
+var statusTrackerContainer = document.getElementById("statusTrackerContainer");
+var inspectionDetails = $('section').eq(0).get(0);
+var dummyNode = statusTrackerContainer.cloneNode(true);
+inspectionDetails.append(dummyNode);
+$(window).scroll(function() {   
+	if($(window).scrollTop() > 700) {
+		inspectionDetails.prepend(dummyNode);
+	   inspectionDetails.append(statusTrackerContainer);  
+	}
+	else{
+		inspectionDetails.insertBefore(statusTrackerContainer,scheduledServices);
+		inspectionDetails.append(dummyNode);
+
+	}
+});
+
