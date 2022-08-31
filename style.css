@@ -37,10 +37,48 @@ header h1{
   text-align: center;
   font-size: normal;
 }
-.techContainer{
+.techContainer:{
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
 }
+.dropDownOptions{
+  display:none;
+  background-color: rgba(255,255,255,0.25);
+}
+.dropDown:hover .dropDownOptions{
+  display:block;
+}
+/* .dropDown:not(:hover) label.onoff::after{
+  content:'Auto Technician<i class="arrow down"></i>';
+}*/
+.dropDown:hover .arrow::before {
+  transform: rotate(-45deg);
+  top:0.1em;
+}
+/* .down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+.arrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: block;
+  padding: 3px;
+} */
+
+.arrow::before {
+  border-style: solid;
+  border-width: 0.15em 0.15em 0 0;
+  content: '';
+  display: inline-block;
+  height: 0.45em;
+  width: 0.45em;
+  left: -0.1em;
+  top: -0.25em;
+  position: relative;
+  transform: rotate(135deg);
+}
+
 .onoff{
 font-size: larger;
 text-align: left;

@@ -15,17 +15,34 @@
 </header>
 
 <body>
-  <div>
+  <div class="dropDown">
     <div class="textToggle">
-      <label class="onoff" for="test">Auto Technician</label>
+      <label class="onoff" for="test"><i class="arrow"></i>Auto Technician</label>
       <label class="toggle" id="test">
-        <input type="checkbox" id="warnUser"/>
+        <input type="checkbox" id="autoTech"/>
         <span class="slider round"></span>
       </label>
     </div>
-    <div class="techContainer" id="autoTech">
-      <label class="techSelectLabel"for="techSelection">Select Tech</label>
-      <select class="techSelection" id="techSelection" name="techSelection"></select>
+    <div class="dropDownOptions">
+      <div class="techContainer" id="selectTech">
+        <label class="techSelectLabel"for="techSelection">Technician</label>
+        <select class="techSelection" id="techSelection" name="techSelection"></select>
+      </div>
+      <div class="techContainer" id="actTech">
+        <label class="techSelectLabel"for="activateSelection">Change Condition</label>
+        <select class="techSelection" id="activateSelection" name="techSelection">
+          <option id="0">Every MPI</option>
+          <option id="1">No Tech Assigned</option>
+        </select>
+      </div>
+      <div class="techContainer" id="actTech">
+        <label class="techSelectLabel"for="activateSelection">Auto Confirm Change</label>
+        <select class="techSelection" id="activateSelection" name="techSelection">
+          <option id="0">Every Time</option>
+          <option id="1">No Tech Assigned</option>
+          <option id="2">Never</option>
+        </select>
+      </div>
     </div>
   </div>
   </body>

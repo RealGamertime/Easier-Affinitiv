@@ -38,7 +38,8 @@ function addListenerFor(obj){
 const settings={
 	'selectedTech': null,
 	'warnUser': true,
-  'availTechs': ["Cosmo Verdi","Dugan Sheridan","HECTOR A OLMEDO","Jesus Rodriguez","KEVIN GILLILAND","Nicholas Carr","Nick Wekell","SEAN M RAGSDALE","TRISTAN SHARP"]
+	'autoTech': false,
+	'availTechs': ["Cosmo Verdi","Dugan Sheridan","HECTOR A OLMEDO","Jesus Rodriguez","KEVIN GILLILAND","Nicholas Carr","Nick Wekell","SEAN M RAGSDALE","TRISTAN SHARP"]
 };
 //var isMPI = false;
 document.addEventListener("DOMContentLoaded", async () =>{
@@ -52,6 +53,7 @@ document.addEventListener("DOMContentLoaded", async () =>{
 			settings.selectedTech = data.selectedTech;
 			settings.warnUser = data.warnUser;
 			settings.availTechs = data.availTechs;
+			settings.autoTech = data.autoTech;
 		}
 		console.log("Begin: Settings");
 		console.log("Selected Tech: " + settings.selectedTech);
@@ -66,25 +68,8 @@ document.getElementById("techSelection").addEventListener("change", function(){
 	console.log("changed selectedTech to: " + this.value);
 	chrome.storage.sync.set({'selectedTech':this.value});
 });
-document.getElementById("warnUser").addEventListener("change", function(event){
-	var mainParentNode = event.target.parentNode.parentNode.parentNode;
-	var dropDown = mainParentNode.children[1];
-	var displayOptions = event.currentTarget.checked;
-	console.log(event);
-	if(event.detail) {
-		displayOptions = settings.warnUser;
-	}
-	else{
-		chrome.storage.sync.set({'warnUser':event.currentTarget.checked});
-	}
-	if(displayOptions){
-		dropDown.style.display = "";
-	}
-	else{
-		dropDown.style.display = "none";
-	}
-	
-	console.log(event.currentTarget.checked);
+document.getElementById("autoTech").addEventListener("change", function(event){
+	chrome.storage.sync.set({'autoTech':event.currentTarget.checked});
 });
 
 
@@ -104,8 +89,7 @@ function createTechOptions(techs){
 	});
 }
 function initSettings(techs){
-	document.getElementById("warnUser").dispatchEvent(new CustomEvent('change', {detail: true}));
-	$('#warnUser')[0].checked = settings.warnUser;
+	$('#autoTech')[0].checked = settings.autoTech;
 	createTechOptions(techs);
 	if(techs.includes(settings.selectedTech)){
 		console.log("Selected tech exists.");
