@@ -67,7 +67,23 @@ document.getElementById("techSelection").addEventListener("change", function(){
 	chrome.storage.sync.set({'selectedTech':this.value});
 });
 document.getElementById("warnUser").addEventListener("change", function(event){
-	chrome.storage.sync.set({'warnUser':event.currentTarget.checked});
+	var mainParentNode = event.target.parentNode.parentNode.parentNode;
+	var dropDown = mainParentNode.children[1];
+	var displayOptions = event.currentTarget.checked;
+	console.log(event);
+	if(event.detail) {
+		displayOptions = settings.warnUser;
+	}
+	else{
+		chrome.storage.sync.set({'warnUser':event.currentTarget.checked});
+	}
+	if(displayOptions){
+		dropDown.style.display = "";
+	}
+	else{
+		dropDown.style.display = "none";
+	}
+	
 	console.log(event.currentTarget.checked);
 });
 
@@ -75,7 +91,7 @@ document.getElementById("warnUser").addEventListener("change", function(event){
 
 function main(){
 	var techs = settings.availTechs;
-	selectSettings(techs);
+	initSettings(techs);
 }
 
 function createTechOptions(techs){
@@ -87,7 +103,8 @@ function createTechOptions(techs){
 		techSelectionClass.appendChild(techOption);
 	});
 }
-function selectSettings(techs){
+function initSettings(techs){
+	document.getElementById("warnUser").dispatchEvent(new CustomEvent('change', {detail: true}));
 	$('#warnUser')[0].checked = settings.warnUser;
 	createTechOptions(techs);
 	if(techs.includes(settings.selectedTech)){
