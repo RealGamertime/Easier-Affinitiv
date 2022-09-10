@@ -5,19 +5,21 @@
 
 document.addEventListener('info', function (e) {
   var data = e.detail;
-  if (data.warnUser == null) {
-    console.warn("Easier Affinitiv: warnUser has no value, defaulting to warning user.");
-    data.warnUser = true;
+  if (data.changeTech) {
+    //alert(data.selectedIndex);
+	  $('#technicianSelect').get(0).selectedIndex = data.selectedIndex;
+	  
+	  
+	  console.log('received', data.selectedIndex);
+	  if (!data.warnUser) {
+		var realConfirm = window.confirm;
+		window.confirm = function () {
+		  window.confirm = realConfirm;
+		  return true;
+		};
+	  }
+	  $('#technicianSelect').change();
   }
-  console.log('received', data.warnUser);
-  if (!data.warnUser) {
-    var realConfirm = window.confirm;
-    window.confirm = function () {
-      window.confirm = realConfirm;
-      return true;
-    };
-  }
-  $('#technicianSelect').change();
 });
 
 var scheduledServices = document.getElementById("scheduled-services");

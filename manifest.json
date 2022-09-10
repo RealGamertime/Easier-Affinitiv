@@ -3,7 +3,7 @@
   "name": "Easier Affinitiv",
   "description": "Aids with making Affinitive more efficent for Technicians.",
   "host_permissions": ["*://*.autoloop.us/dms/app/Schedule/MPI/Inspection/*"],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "permissions": ["activeTab", "tabs", "scripting", "storage"],
   "content_scripts":[
     {
