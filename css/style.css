@@ -11,20 +11,22 @@ body
 {
   margin-top: 0px;
   margin-bottom: 10px;
-  margin:0px;
   display: flex;
   min-width:300px;
   align-items: normal;
   flex-direction: column;
   background-color: #f0f0f0;
 }
-header{
+header#title{
   flex-basis: fit-content;
   font-size: 15px;
   text-align: center;
   margin:0px;
 }
-header h1{
+select{
+  width: 11em;
+}
+header h1#title{
   line-height: 1em;
   margin-bottom: 10px;
 }
@@ -33,8 +35,10 @@ header h1{
   justify-content: space-between;
   background-color: rgba(255,255,255,0.5);
 }
+.option{
+  margin:0;
+}
 .optionLabel{
-  text-align: center;
   font-size: normal;
 }
 .optionContainer{
@@ -43,14 +47,30 @@ header h1{
 }
 .dropDownOptions{
   display:none;
-  background-color: rgba(255,255,255,0.25);
+  /* width:90%; */
+  /* margin:auto; */
+  background-color: rgba(255,255,255,0.45);
+ }
+div.dropDownOptions.disabled label {
+    color: gray;
 }
-.dropDown:hover .dropDownOptions{
-  display:block;
+div.dropDownOptions.disabled .slider::before {
+    filter:brightness(75%);
 }
-.dropDown:hover .arrow::before {
+div.dropDownOptions.disabled .slider {
+    background-color: gray ;
+    box-shadow: none ;
+}
+.arrowUp::before {
   transform: rotate(-45deg);
   top:0.1em;
+}
+.arrowDown::before {
+  transform: rotate(135deg);
+  top: -0.25em;
+}
+.textToggle:hover{
+  background-color: rgba(0,0,0,0.10);
 }
 .arrow::before {
   border-style: solid;
@@ -60,9 +80,9 @@ header h1{
   height: 0.45em;
   width: 0.45em;
   left: -0.1em;
-  top: -0.25em;
+  
   position: relative;
-  transform: rotate(135deg);
+  
 }
 
 .onoff{
@@ -82,7 +102,7 @@ opacity: 0;
 width: 0;
 height: 0;
 }
-.slider {
+div .slider {
 position: relative;
 display: block;
 cursor: pointer;
@@ -91,7 +111,7 @@ transition: 0.4s;
 width: 25px;
 height: 10px;
 }
-.slider:before {
+div .slider:before {
 content: "";
 position: absolute;
 height: 20px;

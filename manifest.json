@@ -8,12 +8,12 @@
   "content_scripts":[
     {
       "matches": ["*://*.autoloop.us/dms/app/Schedule/MPI/Inspection/*"],
-      "js": ["jquery-3.6.0.min.js","content.js"]
+      "js": ["js/jquery-3.6.0.min.js","js/content.js"]
     }
   ],
   "web_accessible_resources": [
     {
-    "resources": ["inject.js"],
+    "resources": ["js/inject.js"],
     "matches": ["<all_urls>"]
     }
   ],

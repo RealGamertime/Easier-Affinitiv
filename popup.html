@@ -5,45 +5,86 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script type="module" src="./popup.js"></script>
-  <script type="module" src="./jquery-3.6.0.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <script type="module" src="./js/popup.js"></script>
+  <script type="module" src="./js/jquery-3.6.0.min.js"></script>
+  <link rel="stylesheet" href="./css/style.css">
 </head>
 
-<header>
-  <h1>Easier Affinitiv</h1>
-</header>
-
 <body>
-  <div class="dropDown">
-    <div class="textToggle">
-      <label class="onoff" for="test"><i class="arrow"></i>Auto Technician</label>
-      <label class="toggle" id="test">
+  <header>
+    <h1>Easier Affinitiv</h1>
+  </header>
+  <div class="option" id="autoTechToggle">
+    <div class="textToggle dropDownOpen">
+      <label class="onoff" for="autoTechLabel">
+        <i class="arrow arrowDown"></i> <!-- TODO: Change to gear icon -->
+        Auto Technician
+      </label>
+      <label class="toggle" id="autoTechLabel">
         <input type="checkbox" id="autoTech"/>
         <span class="slider round"></span>
       </label>
     </div>
-    <div class="dropDownOptions">
+    <div class="dropDownOptions" id="autoTechOptions">
       <div class="optionContainer" id="selectTech">
-        <label class="optionLabel"for="techSelection">Technician</label>
-        <select class="optionSelection" id="techSelection" name="techSelection"></select>
+        <label class="optionLabel"for="selectedTech">Technician</label>
+        <select class="optionSelection" id="selectedTech" name="selectedTech"></select>
       </div>
       <div class="optionContainer" id="actTech">
-        <label class="optionLabel"for="activateSelection">Change Condition</label>
-        <select class="optionSelection" id="activateSelection" name="activateSelection">
-          <option id="0">Every Time</option>
-          <option id="1">No Tech Assigned</option>
+        <label class="optionLabel"for="selectedAct">Change Condition</label>
+        <select class="optionSelection" id="selectedAct" name="selectedAct">
+          <option value="0">Every Time</option>
+          <option value="1">No Tech Assigned</option>
         </select>
       </div>
       <div class="optionContainer" id="conTech">
-        <label class="optionLabel"for="confirmSelection">Disable Confirmation</label>
-        <select class="optionSelection" id="confirmSelection" name="confirmSelection">
-          <option id="0">Every Time</option>
-          <option id="1">No Tech Assigned</option>
-          <option id="2">Never</option>
+        <label class="optionLabel"for="selectedConf">Disable Confirmation</label>
+        <select class="optionSelection" id="selectedConf" name="selectedConf">
+          <option value="0">Every Time</option>
+          <option value="1">No Tech Assigned</option>
+          <option value="2">Never</option>
         </select>
       </div>
     </div>
   </div>
-  </body>
+  <div class="option" id="autoMeasureToggle">
+    <div class="textToggle dropDownOpen">
+      <label class="onoff" for="autoMeasureLabel">
+        <i class="arrow arrowDown"></i>
+        Auto Measurements
+      </label>
+      <label class="toggle" id="autoMeasureLabel">
+        <input type="checkbox" id="autoMeasurements"/>
+        <span class="slider round"></span>
+      </label>
+    </div>
+    <div class="dropDownOptions" id="autoMeasureOptions">
+      <div class="textToggle">
+        <label class="onoff" for="autoCloseMeasureLabel">
+          Close Measurements
+        </label>
+        <label class="toggle" id="autoCloseMeasureLabel">
+          <input type="checkbox" id="autoCloseMeasurements"/>
+          <span class="slider round"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="option" id="autoStatusTracker">
+    <div class="textToggle">
+      <label class="onoff" for="statusTrackerLabel">Bottom Status Tracker</label>
+      <label class="toggle" id="statusTrackerlabel">
+        <input type="checkbox" id="statusTracker"/>
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </div>
+  <div class="option" id="autoFill">
+    <div id="autoFillPage" class="textToggle dropDownOpen">
+      <label class="onoff" for="autoMeasureLabel">
+        Autofill Services
+      </label>
+    </div>
+  </div>
+</body>
 </html>

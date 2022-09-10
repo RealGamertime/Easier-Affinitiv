@@ -1,53 +1,24 @@
-/*var skipped = false;
-
-skipped = !skipped;
-async function clickSkipAll(skip){
-  if(typeof skip === 'undefined') {
-    skip = skipped;
-    skipped = !skipped;
-  }
-  var skipButtons = $('[ng-click="vm.toggleSkipInspectionResult(inspectionResult)"]');
-  await skipButtons.each((i)=>{
-  var button = skipButtons.eq(i);
-  var hasSkipped = button.find("i.fa-check-square-o").length == 1;
-  if(skip != hasSkipped){
-      try{
-      button.click();
-      }catch(err){
-          console.log(button);
-          console.log(err.message);
-      }
-  }
-});
-}
-
-chrome.runtime.onConnect.addListener(function(port) {
-	console.assert(port.name === "main");
-	port.onMessage.addListener(function(msg) {
-		if(request.toggle == "skipAll"){
-			console.log("Skipping All 25 Point Inspections!");
-			clickSkipAll();
-			port.postMessage({toggle:skipped});
-		}
-	});
-});
- 
-/*chrome.runtime.onMessage.addListener( function(request, sender, sendResponse){
-  if(request.toggle == "skipAll"){
-    console.log("Skipping All 25 Point Inspections!");
-    
-    clickSkipAll();
-    sendResponse({toggle:skipped});
-  }
-});*/
 var techSelectionClass = $('#technicianSelect');
 var warnUser = false;
 var pageTechIndex = -1;
+var inspectionsResults;
 retrieveSettings();
 main();
+// const settings={
+// 	'selectedTech': null,
+// 	'autoTech': false,
+//   'statusTracker':true,
+//   'openMeasurements':false,
+// 	'selectedConf': 0,
+// 	'selectedAct':0,
+// 	'availTechs': ["Cosmo Verdi","Dugan Sheridan","HECTOR A OLMEDO","Jesus Rodriguez","KEVIN GILLILAND","Nicholas Carr","Nick Wekell","SEAN M RAGSDALE","TRISTAN SHARP"]
+// };
 const settings={
 	'selectedTech': null,
 	'autoTech': false,
+	'statusTracker':true,
+	'autoMeasurements':false,
+	'autoCloseMeasurements':true,
 	'selectedConf': 0,
 	'selectedAct':0,
 	'availTechs': ["Cosmo Verdi","Dugan Sheridan","HECTOR A OLMEDO","Jesus Rodriguez","KEVIN GILLILAND","Nicholas Carr","Nick Wekell","SEAN M RAGSDALE","TRISTAN SHARP"]
@@ -68,11 +39,20 @@ function retrieveSettings(){
       chrome.storage.sync.set(settings);
     }
     else{
-      //console.log(data.selectedTech);
-      settings.selectedTech = data.selectedTech;
-      settings.selectedConf = data.selectedConf;
-	  settings.selectedAct = data.selectedAct;
-	  settings.autoTech = data.autoTech;
+      console.log(data);
+			console.log("Begin: Settings");
+      for(let prop in data)
+			{
+				if (settings.hasOwnProperty(prop)) {
+					settings[prop] = data[prop];
+					console.log(prop + ": " + data[prop]);
+				}
+				else{
+					console.info(prop + " is not in settings... removing.");
+					chrome.storage.sync.remove(prop);
+				}
+			}
+			console.log("End: Settings");
     }
 });
 }
@@ -91,10 +71,9 @@ async function main(){
   await waitForPageLoad();
   //var techs = getAllTechnicians();
   //updateSetting("availTechs", techs);
-  console.log(settings.selectedTech);
+  //console.log(settings.selectedTech);
   //alert(techs);
   if(settings.availTechs.includes(settings.selectedTech)){
-    //alert(settings.selectedTech + " is available");
     var availTechs = techSelectionClass.children();
     availTechs.each((index, tech)=>{
       if(tech.innerHTML == settings.selectedTech)
@@ -107,7 +86,37 @@ async function main(){
 	  
     console.info(`Selected Technician; ${settings.selectedTech} does not exist.`);
   }
+  autoMeasurements();
   inject();
+}
+
+$('#technicianSelect').on('change', ()=>{
+	techChanged();
+});
+
+async function techChanged(){
+  await waitForPageLoad();
+	autoMeasurements();
+}
+
+function autoMeasurements(){
+  if(settings.autoMeasurements){
+    //console.log("auto measurements");
+    let inspectionsResults = $("li[id*='-ed11-8379-00155dbf760b']");
+    inspectionsResults.each((i,element)=>{
+      $(element).find('i.fa-plus-square-o').click(()=> {
+        $(element).find('custom-fields i.fa-pencil').click();
+      if(settings.autoCloseMeasurements){
+        var boxes = $(element).find('custom-field-input');
+        boxes.each((i, box)=>{
+          $(box).find('textarea').eq(0).focusout(()=>{ 
+            $(box).find('i.fa-save').click();
+        });
+        });
+      }
+      });
+    });
+  }
 }
 //var scheduledServices = document.getElementById("scheduled-services");
 
@@ -157,12 +166,13 @@ function inject(){
 	var changeTech = (settings.autoTech && pageTechIndex !=-1 && autoTechChange());
 	
   var s = document.createElement('script');
-  s.src = chrome.runtime.getURL('./inject.js');
+  s.src = chrome.runtime.getURL('./js/inject.js');
   s.onload = function() {
     var data = {
       changeTech: changeTech,
-	  warnUser: warnUser,
-	  selectedIndex: pageTechIndex
+      warnUser: warnUser,
+      selectedIndex: pageTechIndex,
+      statusTracker: settings.statusTracker
     };
     document.dispatchEvent(new CustomEvent('info', { detail: data }));
     
