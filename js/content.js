@@ -2,6 +2,7 @@ var techSelectionClass = $('#technicianSelect');
 var warnUser = false;
 var pageTechIndex = -1;
 var inspectionsResults;
+var injectionComplete = false;
 retrieveSettings();
 main();
 // const settings={
@@ -86,8 +87,8 @@ async function main(){
 	  
     console.info(`Selected Technician; ${settings.selectedTech} does not exist.`);
   }
+  await inject();
   autoMeasurements();
-  inject();
 }
 
 $('#technicianSelect').on('change', ()=>{
@@ -101,7 +102,7 @@ async function techChanged(){
 
 function autoMeasurements(){
   if(settings.autoMeasurements){
-    //console.log("auto measurements");
+    console.log("auto measurements");
     let inspectionsResults = $("li[id*='-ed11-8379-00155dbf760b'][id*='result']");
     inspectionsResults.each((i,element)=>{
       $(element).find('i.fa-plus-square-o').click(()=> {
@@ -161,7 +162,7 @@ function getAllTechnicians(htmlString){
   return techs;
 }
 
-function inject(){
+async function inject(){
 	var warnUser = autoTechWarn();
 	var changeTech = (settings.autoTech && pageTechIndex !=-1 && autoTechChange());
 	
@@ -178,4 +179,12 @@ function inject(){
     
   };
   (document.body || document.head || document.documentElement).appendChild(s);
+  while(!injectionComplete){
+    await new Promise((resolve, reject) => setTimeout(resolve, 10));
+  }
 }
+
+document.addEventListener('injectionComplete', function (e) {
+  injectionComplete = true;
+  console.log('Injection Completed!');
+});

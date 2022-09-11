@@ -39,6 +39,6 @@ document.addEventListener('info', function (e) {
 		}
 	});
   }
-  
+  document.dispatchEvent(new CustomEvent('injectionComplete'));
 });
 
