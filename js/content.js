@@ -178,13 +178,13 @@ async function inject(){
     document.dispatchEvent(new CustomEvent('info', { detail: data }));
     
   };
+  document.addEventListener('injectionComplete', function (e) {
+    injectionComplete = true;
+    console.log('Injection Completed!');
+  });
   (document.body || document.head || document.documentElement).appendChild(s);
+  
   while(!injectionComplete){
     await new Promise((resolve, reject) => setTimeout(resolve, 10));
   }
 }
-
-document.addEventListener('injectionComplete', function (e) {
-  injectionComplete = true;
-  console.log('Injection Completed!');
-});
