@@ -102,7 +102,7 @@ async function techChanged(){
 function autoMeasurements(){
   if(settings.autoMeasurements){
     //console.log("auto measurements");
-    let inspectionsResults = $("li[id*='-ed11-8379-00155dbf760b']");
+    let inspectionsResults = $("li[id*='-ed11-8379-00155dbf760b'][id*='result']");
     inspectionsResults.each((i,element)=>{
       $(element).find('i.fa-plus-square-o').click(()=> {
         $(element).find('custom-fields i.fa-pencil').click();
@@ -166,7 +166,7 @@ function inject(){
 	var changeTech = (settings.autoTech && pageTechIndex !=-1 && autoTechChange());
 	
   var s = document.createElement('script');
-  s.src = chrome.runtime.getURL('./js/inject.js');
+  s.src = chrome.runtime.getURL('/js/inject.js');
   s.onload = function() {
     var data = {
       changeTech: changeTech,
