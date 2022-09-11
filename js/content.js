@@ -1,19 +1,12 @@
+const DEBUG = true;
+
 var techSelectionClass = $('#technicianSelect');
 var warnUser = false;
 var pageTechIndex = -1;
 var inspectionsResults;
 var injectionComplete = false;
-retrieveSettings();
 main();
-// const settings={
-// 	'selectedTech': null,
-// 	'autoTech': false,
-//   'statusTracker':true,
-//   'openMeasurements':false,
-// 	'selectedConf': 0,
-// 	'selectedAct':0,
-// 	'availTechs': ["Cosmo Verdi","Dugan Sheridan","HECTOR A OLMEDO","Jesus Rodriguez","KEVIN GILLILAND","Nicholas Carr","Nick Wekell","SEAN M RAGSDALE","TRISTAN SHARP"]
-// };
+
 const settings={
 	'selectedTech': null,
 	'autoTech': false,
@@ -24,38 +17,35 @@ const settings={
 	'selectedAct':0,
 	'availTechs': ["Cosmo Verdi","Dugan Sheridan","HECTOR A OLMEDO","Jesus Rodriguez","KEVIN GILLILAND","Nicholas Carr","Nick Wekell","SEAN M RAGSDALE","TRISTAN SHARP"]
 };
-function retrieveSettings(){
+async function retrieveSettings(){
   
   
   // chrome.storage.sync.get(null, function(data) { 
   //   console.log(data)});
-  chrome.storage.sync.get(null, function(data) {
-    console.log("Raw");
-    console.log(data);
-    console.log(Object.keys(data));
-    //Checking if any settings in storage.sync
-    if(Object.keys(data).length === 0){
-      //Initilizing settings
-      console.log("No data, importing default settings.");
-      chrome.storage.sync.set(settings);
-    }
-    else{
-      console.log(data);
-			console.log("Begin: Settings");
-      for(let prop in data)
-			{
-				if (settings.hasOwnProperty(prop)) {
-					settings[prop] = data[prop];
-					console.log(prop + ": " + data[prop]);
-				}
-				else{
-					console.info(prop + " is not in settings... removing.");
-					chrome.storage.sync.remove(prop);
-				}
-			}
-			console.log("End: Settings");
-    }
-});
+  await new Promise((resolve,reject)=>{
+    chrome.storage.sync.get(null, function(data) {
+      //Checking if any settings in storage.sync
+      if(Object.keys(data).length === 0){
+        //Initilizing settings
+        debug("No data, importing default settings.");
+        chrome.storage.sync.set(settings);
+      }
+      else{
+        for(let prop in data)
+        {
+          if (settings.hasOwnProperty(prop)) {
+            settings[prop] = data[prop];
+          }
+          else{
+            console.info(prop + " is not in settings... removing.");
+            chrome.storage.sync.remove(prop);
+          }
+        }
+        debug("Loaded Settings: ", data);
+        resolve();
+      }
+    });
+  });
 }
 
 /*function updateSetting(settingKey, data){
@@ -69,6 +59,9 @@ function retrieveSettings(){
 
 async function main(){
   //chrome.storage.sync.clear();
+  debug("retrieving settings");
+  await retrieveSettings();
+  debug("waiting for page load");
   await waitForPageLoad();
   //var techs = getAllTechnicians();
   //updateSetting("availTechs", techs);
@@ -96,13 +89,14 @@ $('#technicianSelect').on('change', ()=>{
 });
 
 async function techChanged(){
+  debug("TECHCHANGED");
   await waitForPageLoad();
 	autoMeasurements();
 }
 
 function autoMeasurements(){
   if(settings.autoMeasurements){
-    console.log("auto measurements");
+    debug("auto measurements");
     let inspectionsResults = $("li[id*='-ed11-8379-00155dbf760b'][id*='result']");
     inspectionsResults.each((i,element)=>{
       $(element).find('i.fa-plus-square-o').click(()=> {
@@ -129,10 +123,10 @@ function autoTechChange(){
 	return noTechAssigned;
 }
 function autoTechWarn(){
-	console.log(techSelectionClass[0].selectedOptions[0].innerText);
+	debug(techSelectionClass[0].selectedOptions[0].innerText);
 	var techValue = techSelectionClass[0].selectedOptions[0].innerText;
 	var noTechAssigned = techValue==="" || techValue==="NOTAPPLICABLE";
-    console.log(noTechAssigned);
+    debug(noTechAssigned);
 	if(settings.selectedConf == 0)
 		return false;
 	else if(settings.selectedConf == 1)
@@ -141,13 +135,15 @@ function autoTechWarn(){
 }
 
 async function waitForPageLoad(){
-  //alert("Waiting for ajaxspinner to load");
+  debug("Waiting for ajaxspinner to load");
   while(!$('.ajaxSpinner').length){
     await new Promise((resolve, reject) => setTimeout(resolve, 3000));
+    debug("Waiting!");
   }
-  //alert("Waiting for ajaxspinner to close");
+  debug("Waiting for ajaxspinner to close");
   while($('.ajaxSpinner').length){
     await new Promise((resolve, reject) => setTimeout(resolve, 500));
+    debug("Waiting!");
   }
   //await new Promise((resolve, reject) => setTimeout(resolve, 500));
 }
@@ -180,11 +176,22 @@ async function inject(){
   };
   document.addEventListener('injectionComplete', function (e) {
     injectionComplete = true;
-    console.log('Injection Completed!');
+    debug('Injection Completed!');
   });
   (document.body || document.head || document.documentElement).appendChild(s);
   
   while(!injectionComplete){
     await new Promise((resolve, reject) => setTimeout(resolve, 10));
+  }
+}
+
+
+function debug(info, obj){
+  if(DEBUG) {
+    console.log(info);
+    if(obj != null){
+      console.log(obj);
+      console.table(obj);
+    }
   }
 }
