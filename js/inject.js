@@ -5,6 +5,7 @@
 
 document.addEventListener('info', function (e) {
   var data = e.detail;
+	console.log(e);
   if (data.changeTech) {
     //alert(data.selectedIndex);
 	  $('#technicianSelect').get(0).selectedIndex = data.selectedIndex;
@@ -41,4 +42,26 @@ document.addEventListener('info', function (e) {
   }
   document.dispatchEvent(new CustomEvent('injectionComplete'));
 });
-
+document.addEventListener('autoMeasure', function (data) {
+	let inspectionsResults = $("li[id*='-ed11-8379-00155dbf760b'][id*='result']");
+	inspectionsResults.each((i,element)=>{
+		$(element).find('i.fa-plus-square-o').click(()=> {
+			$(element).find('custom-fields i.fa-pencil').click();
+		if(data.detail.autoCloseMeasurements){
+			var boxes = $(element).find('custom-field-input');
+			boxes.each((i, box)=>{
+				$(box).find('textarea').eq(0).focusout(()=>{ 
+					//console.log(box);
+					var textElement = $(box).find('textarea');
+					var measurement = textElement.val();
+					$(box).find('i.fa-save').click();
+					var boxAhead = $(boxes.get(i+1)).find('textarea');
+					console.log(boxAhead);
+					$(boxAhead).val(measurement).select();
+					$(boxAhead).change();
+			});
+			});
+		}
+		});
+	});
+});

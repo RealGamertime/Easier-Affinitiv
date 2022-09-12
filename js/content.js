@@ -94,25 +94,7 @@ async function techChanged(){
 	autoMeasurements();
 }
 
-function autoMeasurements(){
-  if(settings.autoMeasurements){
-    debug("auto measurements");
-    let inspectionsResults = $("li[id*='-ed11-8379-00155dbf760b'][id*='result']");
-    inspectionsResults.each((i,element)=>{
-      $(element).find('i.fa-plus-square-o').click(()=> {
-        $(element).find('custom-fields i.fa-pencil').click();
-      if(settings.autoCloseMeasurements){
-        var boxes = $(element).find('custom-field-input');
-        boxes.each((i, box)=>{
-          $(box).find('textarea').eq(0).focusout(()=>{ 
-            $(box).find('i.fa-save').click();
-        });
-        });
-      }
-      });
-    });
-  }
-}
+
 //var scheduledServices = document.getElementById("scheduled-services");
 
 function autoTechChange(){
@@ -132,6 +114,13 @@ function autoTechWarn(){
 	else if(settings.selectedConf == 1)
 		return !noTechAssigned;
 	return true;
+}
+
+function autoMeasurements(){
+  if(settings.autoMeasurements){
+    debug("Auto Measurements Initilizing");
+    document.dispatchEvent(new CustomEvent('autoMeasure', {detail:{'autoCloseMeasurements':settings.autoCloseMeasurements}}));
+  }
 }
 
 async function waitForPageLoad(){
@@ -191,7 +180,6 @@ function debug(info, obj){
     console.log(info);
     if(obj != null){
       console.log(obj);
-      console.table(obj);
     }
   }
 }
