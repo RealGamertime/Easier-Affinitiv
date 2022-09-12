@@ -1,32 +1,98 @@
 
-const services = [ 
-"Engine Air Filter",
-"Cabin Air Filter",
-"Battery Replacement",
-"Battery Service",
-"Fuel System Cleaning",
-"Brake Fluid Flush",
-"Coolant Flush",
-"Power Steering Flush",
-"Auto Trans Flush",
-"4x4 Service",
-"Alignment"];
+const services = [{ 
+  serviceName:"Engine Air Filter",
+  mPIDescription:"Engine Air Filter",
+  quickSelectOption:"Replace Air Filter",
+},{ 
+  serviceName:"Cabin Air Filter",
+  mPIDescription:"Cabin Air Filter",
+  quickSelectOption:"Cabin Air Filter"
+},{ 
+  serviceName:"Battery Replacement",
+  mPIDescription:"Battery Performance",
+  quickSelectOption:"Replace Battery"
+},{ 
+  serviceName:"Battery Service",
+  mPIDescription:"Battery Performance",
+  otherNotes:"Battery Cleaning Service Recommended.",
+  hours:0.3
+},{ 
+  serviceName:"Fuel System Cleaning",
+  mPIDescription:"Fuel System",
+  quickSelectOption:"Fuel System Cleaning"
+},{
+  serviceName:"Wiper Blades",
+  mPIDescription:"Wiper Blades"
+},{
+  serviceName:"Brake Fluid Flush",
+  mPIDescription:"Brake Fluid",
+  quickSelectOption: "Brake System"
+},{
+  serviceName:"Coolant Flush",
+  mPIDescription: "Cooling System",
+  quickSelectOption:"Cooling System"
+},{
+  serviceName:"Power Steering Flush",
+  mPIDescription:"Power Steering Fluid",
+  quickSelectOption:"Power Steering Fluid"
+},{ 
+  serviceName:"4x4 Service",
+  mPIDescription:"Transmission, U-Joints",
+  otherNotes:"4x4 Service Recommended.",
+  hours:1.5
+},{
+  serviceName:"Auto Transmission Flush",
+  mPIDescription:"Transmission, U-Joints",
+  quickSelectOption:"Automatic Transmission"
+},{
+  serviceName: "4 Wheel Alignment",
+  mPIDescription: "Drive Shaft/CV Boots",
+  quickSelectOption: "4 Wheel"
+}];
+
+
+/* Data:
+
+,{
+  serviceName:
+  mPIDescription:
+  quickSelectOption:
+  otherNotes:
+  hours:
+}
+
+
+NEEDED:
+Name displayed
+Name on MPI
+OPTIONAL:
+Quick Select
+Other Notes
+hours
+*/
+
 
 $(this).ready(function(){
- for (var service of services){
-   createServiceElement(service);
+ for (let i = 0; i < services.length; i++) {
+  createServiceElement(services[i].serviceName, i);
  }
 });
 
 $("#submit").click(function(e){
   e.preventDefault();
-  var formValuepairs = $('#autoFillForm').serializeArray();;
-  sendToPage(formValuepairs.map(u => u.name).join(' '));
-  console.log(formValuepairs);
-  
+  let formValuepairs = $('#autoFillForm').serializeArray();
+  for(let valuePair of formValuepairs){
+    let serviceIndex = parseInt(valuePair.name);
+    //console.log(serviceIndex);
+    //console.log(services[serviceIndex]);
+    
+    sendToPage(services[serviceIndex], setService);
+    //console.log(formValuepairs);
+    //brow.sendMessage('setService');
+  }
 });
-function createServiceElement(service){
-  var id = service.replaceAll(" ","").toLowerCase();
+
+function createServiceElement(service,id){
   $('<label>').attr({id: id}).text(service).insertBefore('#autoFillForm div');
   $('<input>' + id).attr({
     type: 'checkbox',
@@ -34,20 +100,59 @@ function createServiceElement(service){
     name: id
   }).prependTo(`#autoFillForm label#${id}`);
 }
-
-
-async function sendToPage(data) {
+async function sendToPage(data, func) {
   let queryOptions = { url:"*://*.autoloop.us/dms/app/Schedule/MPI/Inspection/*"};
   let [tab] = await chrome.tabs.query(queryOptions);
-  console.log(tab);
+  //chrome.tabs.sendMessage(tab.id,data);
   chrome.scripting.executeScript({
     target: {tabId: tab.id},
-    func: inject,
+    func: func,
     args:[data]
   });
 }
 
-function inject(data){
 
-  $('a#lnkDashboard').text(data);
+
+async function setService(service){
+  var inspectionElement = $(`li[id*='-ed11-8379-00155dbf760b'][id*='result'] dd[title*='${service.mPIDescription}']`).parents("li");
+  if(inspectionElement.find("fancy-checkbox[additional-classes='red'] i.fa-check-square-o").length === 0)
+  {
+    if(service.quickSelectOption || service.otherNotes)
+      {
+        
+        envokeClick(inspectionElement.find('i.fa-plus-square-o'));
+
+        if(service.quickSelectOption){
+          var quickSelectElement = inspectionElement.find(`select.service-selector`);
+          quickSelectElement.find(`option[label*="${service.quickSelectOption}"]`).prop('selected', true);
+          envokeChange(quickSelectElement);
+          envokeClick(inspectionElement.find('button[ng-click="vm.add()"]'));
+        }
+        if(service.otherNotes){
+          var otherNotesElement = inspectionElement.find('div.notes-history-container');
+          
+          envokeChange(otherNotesElement.find('input').val(service.otherNotes));
+          envokeClick(otherNotesElement.find('button'));
+          if(service.hours)
+          {
+            envokeChange(otherNotesElement.find('input').val(`${service.hours} hours`));
+            envokeClick(otherNotesElement.find('button'));
+          }
+        }
+
+    }
+    if(service.quickSelectOption){
+      while(true){
+        if(inspectionElement.find('ul.inspection-result-services-list').length==1){
+          break;
+        }
+        console.log("waiting");
+        await new Promise((resolve, reject) => setTimeout(resolve, 50));
+      }
+    }
+    envokeClick(inspectionElement.find("fancy-checkbox[additional-classes='red']"));
+    envokeClick(inspectionElement.find('i.fa-minus-square-o'));
+    function envokeClick(jqelement){jqelement[0].dispatchEvent(new CustomEvent('click'))};
+    function envokeChange(jqelement){jqelement[0].dispatchEvent(new CustomEvent('change'))}
+  }
 }
