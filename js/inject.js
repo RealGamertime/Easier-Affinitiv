@@ -3,7 +3,7 @@
  * This is required in order to access the page's functions and variables.
  */
 
-document.addEventListener('info', function (e) {
+document.addEventListener('info', async function (e) {
   var data = e.detail;
 	console.log(e);
   if (data.changeTech) {
@@ -20,7 +20,15 @@ document.addEventListener('info', function (e) {
 		};
 	  }
 	  $('#technicianSelect').change();
+
+		console.log("Waiting for ajaxspinner to close");
+		do{
+			console.log("Waiting!");
+			await new Promise((resolve, reject) => setTimeout(resolve, 500));
+		}while($('.ajaxSpinner').length);
   }
+	
+
   if(data.statusTracker){
 	var scheduledServices = document.getElementById("scheduled-services");
 	var statusTrackerContainer = document.getElementById("statusTrackerContainer");
@@ -40,6 +48,7 @@ document.addEventListener('info', function (e) {
 		}
 	});
   }
+	fixTireOptions();
   document.dispatchEvent(new CustomEvent('injectionComplete'));
 });
 document.addEventListener('autoMeasure', function (data) {
@@ -65,3 +74,13 @@ document.addEventListener('autoMeasure', function (data) {
 		});
 	});
 });
+
+
+function fixTireOptions(){
+	var inspectionElement = $(`li[id*='-ed11-8379-00155dbf760b'][id*='result'] dd[title*='Front Tires']`).parents("li");
+	inspectionElement.find('i.fa-plus-square-o').click(function(){
+			$('option[label="Mount & Balance Four Tires"]').attr("label","Mount & Balance 4 Tires");
+			var e = $('option[label="Mount And Balance 3 Tires."]').attr("label","Mount & Balance 3 Tires");
+			e.prev().insertAfter(e);
+	});
+}
