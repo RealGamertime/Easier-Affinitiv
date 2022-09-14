@@ -20,7 +20,12 @@ document.addEventListener('info', async function (e) {
 		};
 	  }
 	  $('#technicianSelect').change();
-
+		if(!$('.ajaxSpinner').length)
+		{
+			console.log("Technician hasn't changed yet, waiting!");
+			alert("Technician hasn't changed yet, waiting!");
+			await new Promise((resolve, reject) => setTimeout(resolve, 500));
+		}
 		console.log("Waiting for ajaxspinner to close");
 		do{
 			console.log("Waiting!");
