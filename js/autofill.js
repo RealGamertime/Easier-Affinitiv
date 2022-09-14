@@ -43,7 +43,7 @@ const services = [{
 },{
   serviceName:"Auto Transmission Flush",
   mPIDescription:"Transmission, U-Joints",
-  quickSelectOption:"Automatic Transmission"
+  quickSelectOption:"Automatic"
 },{
   serviceName: "4 Wheel Alignment",
   mPIDescription: "Drive Shaft/CV Boots",
@@ -78,15 +78,15 @@ $(this).ready(function(){
  }
 });
 
-$("#submit").click(function(e){
+$("#submit").click(async function(e){
   e.preventDefault();
   let formValuepairs = $('#autoFillForm').serializeArray();
   for(let valuePair of formValuepairs){
     let serviceIndex = parseInt(valuePair.name);
     //console.log(serviceIndex);
     //console.log(services[serviceIndex]);
-    
     sendToPage(services[serviceIndex], setService);
+    await new Promise((resolve, reject) => setTimeout(resolve, 300));
     //console.log(formValuepairs);
     //brow.sendMessage('setService');
   }
@@ -143,7 +143,7 @@ async function setService(service){
     }
     if(service.quickSelectOption){
       while(true){
-        if(inspectionElement.find('ul.inspection-result-services-list').length==1){
+        if(inspectionElement.find('ul.inspection-result-services-list').length > 0){
           break;
         }
         console.log("waiting");
@@ -152,7 +152,17 @@ async function setService(service){
     }
     envokeClick(inspectionElement.find("fancy-checkbox[additional-classes='red']"));
     envokeClick(inspectionElement.find('i.fa-minus-square-o'));
-    function envokeClick(jqelement){jqelement[0].dispatchEvent(new CustomEvent('click'))};
-    function envokeChange(jqelement){jqelement[0].dispatchEvent(new CustomEvent('change'))}
+    function envokeClick(jqelement){
+      try
+      {
+        jqelement[0].dispatchEvent(new CustomEvent('click'))
+      }catch(e){console.log(e);}
+    }
+    function envokeChange(jqelement){
+      try
+      {
+        jqelement[0].dispatchEvent(new CustomEvent('change'));
+      }catch(e){console.log(e);}
+    }
   }
 }
