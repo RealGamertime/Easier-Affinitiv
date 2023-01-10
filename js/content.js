@@ -4,7 +4,40 @@ var injectionComplete = false;
 var pageInit = false;
 const authToken = localStorage.getItem("autoLoopApiAuthToken");
 const companyId = 8316;
-main();
+
+var observer = new MutationObserver(function (mutations){
+  //console.log(mutations);
+
+
+
+
+  var services = mutations.map(item => item.addedNodes[0]).filter(elem => $(elem).is("li[id*='result']"));
+  if(services.length != 0){
+    if(!pageInit){
+    pageInit = true;
+    }else{
+    updatePageMods();
+    }
+    console.log(services);
+  }
+});
+let options = {
+subtree:true,
+childList: true
+};
+let targetNode = $('inspection-details')[0];
+console.log(targetNode);
+if($(document).find("li[id*='result']")){
+  console.log("Objects already loaded");
+  pageInit = true;
+}
+observer.observe(targetNode, options);
+
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  console.log("LOADED")});
+window.addEventListener("load", ()=>{
+  console.log("LOADED")});
 
 const settings={
 	'selectedTech': null,
@@ -53,25 +86,7 @@ async function retrieveSettings(){
   }
 }*/
 
-var observer = new MutationObserver(function (itemArray){
-  var services = itemArray.map(item => item.addedNodes[0]).filter(elem => $(elem).is("li[id*='result']"));
-  console.log(itemArray);
-  if(services.length != 0){
-    if(!pageInit){
-    pageInit = true;
-    }else{
-    updatePageMods();
-    }
-    console.log(services);
-  }
-});
-let options = {
-subtree:true,
-childList: true
-};
-let targetNode = $('inspection-details')[0];
-observer.observe(targetNode, options);
-
+main();
 async function main(){
   //chrome.storage.sync.clear();
   console.log(authToken);

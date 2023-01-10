@@ -173,8 +173,10 @@ function parseRO(ro) {
 		if (opInfo === undefined) {
 			console.log("opCode: " + opCode + " Unknown");
 			continue;
+		} else if (opInfo == -1) continue;
+		else{
+			console.log("opInfo: " + opCode + " : " + opInfo);
 		}
-		if (opInfo == -1) continue;
 		let inspectionLineIndex = opInfo[0];
 		let serviceInterval = opInfo[1];
 		let inspectionLine = inspectionsResults.eq(inspectionLineIndex).find("dl.description dd");
