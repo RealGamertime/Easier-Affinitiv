@@ -48,6 +48,12 @@ const services = [{
   serviceName: "4 Wheel Alignment",
   mPIDescription: "Drive Shaft/CV Boots",
   quickSelectOption: "4 Wheel"
+},{
+  serviceName: "Green Everything Else",
+  mPIDescription: "autoGreen"
+},{
+  serviceName: "Skip Everything Else",
+  mPIDescription: "autoSkip"
 }];
 
 
@@ -63,12 +69,12 @@ const services = [{
 
 
 NEEDED:
-Name displayed
-Name on MPI
+Name displayed : serviceName
+Name on MPI : mPIDescription
 OPTIONAL:
-Quick Select
-Other Notes
-hours
+Quick Select : quickSelectOption
+Other Notes : otherNotes
+hours : hours
 */
 
 
@@ -85,10 +91,26 @@ $("#submit").click(async function(e){
     let serviceIndex = parseInt(valuePair.name);
     //console.log(serviceIndex);
     //console.log(services[serviceIndex]);
+    let greenEverythingIndex = services.findIndex(function(service){return service.mPIDescription == "autoGreen"});
+    let skipEverythingIndex = services.findIndex(function(service){return service.mPIDescription == "autoSkip"});
+    if(serviceIndex == greenEverythingIndex){
+      sendToPage("", autoGreen);
+      console.log("autoGreen");
+    }
+    else if(serviceIndex == skipEverythingIndex){
+      sendToPage("", autoSkip);
+      console.log("autoSkip");
+    }
+    else
+    {
+    console.log("Not Auto Green");
     sendToPage(services[serviceIndex], setService);
+    }
     await new Promise((resolve, reject) => setTimeout(resolve, 300));
     //console.log(formValuepairs);
     //brow.sendMessage('setService');
+    console.log(valuePair);
+    
   }
 });
 
@@ -111,7 +133,34 @@ async function sendToPage(data, func) {
   });
 }
 
-
+async function autoGreen(){
+  console.log("autoGreen");
+  try{
+  var inspectionElements = $(`li[id*='-ed11-8379-00155dbf760b'][id*='result'] dd`).parents("li");
+  var notSelectedElements = inspectionElements.filter(function(){return !($(this).find("fancy-checkbox i.fa-check-square-o").length)});
+  notSelectedElements.find("fancy-checkbox[additional-classes='green']").each(function(){envokeClick($(this))});
+  }catch(e){console.log(e);}
+  function envokeClick(jqelement){
+    try
+    {
+      jqelement[0].dispatchEvent(new CustomEvent('click'))
+    }catch(e){console.log(e);}
+  }
+}
+async function autoSkip(){
+  console.log("autoSkip");
+  try{
+  var inspectionElements = $(`li[id*='-ed11-8379-00155dbf760b'][id*='result'] dd`).parents("li");
+  var notSelectedElements = inspectionElements.filter(function(){return !($(this).find("fancy-checkbox i.fa-check-square-o").length)});
+  notSelectedElements.find("dl.skip fancy-checkbox").each(function(){envokeClick($(this))});
+  }catch(e){console.log(e);}
+  function envokeClick(jqelement){
+    try
+    {
+      jqelement[0].dispatchEvent(new CustomEvent('click'))
+    }catch(e){console.log(e);}
+  }
+}
 
 async function setService(service){
   var inspectionElement = $(`li[id*='-ed11-8379-00155dbf760b'][id*='result'] dd[title*='${service.mPIDescription}']`).parents("li");

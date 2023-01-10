@@ -1,10 +1,9 @@
-const DEBUG = true;
-
-var techSelectionClass = $('#technicianSelect');
 var warnUser = false;
 var pageTechIndex = -1;
-var inspectionsResults;
 var injectionComplete = false;
+var pageInit = false;
+const authToken = localStorage.getItem("autoLoopApiAuthToken");
+const companyId = 8316;
 main();
 
 const settings={
@@ -27,21 +26,18 @@ async function retrieveSettings(){
       //Checking if any settings in storage.sync
       if(Object.keys(data).length === 0){
         //Initilizing settings
-        debug("No data, importing default settings.");
+        console.log("No data, importing default settings.");
         chrome.storage.sync.set(settings);
-      }
-      else{
-        for(let prop in data)
-        {
+      }else{
+        for(let prop in data){
           if (settings.hasOwnProperty(prop)) {
             settings[prop] = data[prop];
-          }
-          else{
+          }else{
             console.info(prop + " is not in settings... removing.");
             chrome.storage.sync.remove(prop);
           }
         }
-        debug("Loaded Settings: ", data);
+        console.log("Loaded Settings: ", data);
         resolve();
       }
     });
@@ -57,96 +53,94 @@ async function retrieveSettings(){
   }
 }*/
 
+var observer = new MutationObserver(function (itemArray){
+  var services = itemArray.map(item => item.addedNodes[0]).filter(elem => $(elem).is("li[id*='result']"));
+  console.log(itemArray);
+  if(services.length != 0){
+    if(!pageInit){
+    pageInit = true;
+    }else{
+    updatePageMods();
+    }
+    console.log(services);
+  }
+});
+let options = {
+subtree:true,
+childList: true
+};
+let targetNode = $('inspection-details')[0];
+observer.observe(targetNode, options);
+
 async function main(){
   //chrome.storage.sync.clear();
-  debug("retrieving settings");
+  console.log(authToken);
   await retrieveSettings();
-  debug("waiting for page load");
-  await waitForPageLoad();
-  //var techs = getAllTechnicians();
-  //updateSetting("availTechs", techs);
-  //console.log(settings.selectedTech);
-  //alert(techs);
+  verifyTechs();
+
+  while(!pageInit){
+    await new Promise((resolve, reject) => setTimeout(resolve, 10));
+    console.log("Waiting for page to initialize");
+  }
   if(settings.availTechs.includes(settings.selectedTech)){
-    var availTechs = techSelectionClass.children();
-    availTechs.each((index, tech)=>{
-      if(tech.innerHTML == settings.selectedTech)
-      {
-        pageTechIndex=index;
-      }
-    });
+    console.log("Working");
+    let option = $('#technicianSelect').find(`option[label='${settings.selectedTech}']`);
+    console.log(option);
+    if(option.length == 1){
+      pageTechIndex=option[0].index;
+      console.log(settings.selectedTech, " is available! ", pageTechIndex);
+    }
   }
   else{
-	  
     console.info(`Selected Technician; ${settings.selectedTech} does not exist.`);
   }
   await inject();
-  autoMeasurements();
+  console.log(settings);
+  updatePageMods();
 }
 
-$('#technicianSelect').on('change', ()=>{
-	techChanged();
-});
-
-async function techChanged(){
-  debug("TECHCHANGED");
-  await waitForPageLoad();
-	autoMeasurements();
+function verifyTechs(){
+  var requestUrl = "https://xapi.autoloop.com/api/v1/Technicians";
+  var data = {
+      companyId: 8316,
+      mpiTechniciansOnly:true,
+      forAppointmentSchedulingOnly:false
+    };
+    // send the request
+    $.ajax({
+        type: "GET",
+        url: requestUrl,
+        dataType: 'json',
+        data: data,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader("Authorization", "Bearer " + authToken);
+            xhr.setRequestHeader("X-Loop-CompanyId", JSON.stringify(companyId));
+        },
+        success: function (techsRaw) {
+          let techNames = techsRaw.map(tech=>tech.name);
+          if(settings.availTechs != techNames){
+            settings.availTechs = techNames;
+            chrome.storage.sync.set({availTechs:techNames});
+          }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            notificationBar.clear();
+            notificationBar.add(notificationBar.Error, "An error occurred while trying to add the shortcut: " + errorThrown);
+            notificationBar.showNotifications();
+        }
+    }); //$.ajax
 }
 
-
-//var scheduledServices = document.getElementById("scheduled-services");
-
-function autoTechChange(){
-	var techValue = techSelectionClass[0].selectedOptions[0].innerText;
-	var noTechAssigned = (techValue=="" || techValue=="NOTAPPLICABLE");
-    if(settings.selectedAct == 0)
-		return true;
-	return noTechAssigned;
-}
-function autoTechWarn(){
-	debug(techSelectionClass[0].selectedOptions[0].innerText);
-	var techValue = techSelectionClass[0].selectedOptions[0].innerText;
-	var noTechAssigned = techValue==="" || techValue==="NOTAPPLICABLE";
-    debug(noTechAssigned);
-	if(settings.selectedConf == 0)
-		return false;
-	else if(settings.selectedConf == 1)
-		return !noTechAssigned;
-	return true;
-}
-
-function autoMeasurements(){
-  if(settings.autoMeasurements){
-    debug("Auto Measurements Initilizing");
-    document.dispatchEvent(new CustomEvent('autoMeasure', {detail:{'autoCloseMeasurements':settings.autoCloseMeasurements}}));
-  }
-}
-
-async function waitForPageLoad(){
-  debug("Waiting for ajaxspinner to load");
-  while(!$('.ajaxSpinner').length){
-    await new Promise((resolve, reject) => setTimeout(resolve, 3000));
-    debug("Waiting!");
-  }
-  debug("Waiting for ajaxspinner to close");
-  while($('.ajaxSpinner').length){
-    await new Promise((resolve, reject) => setTimeout(resolve, 500));
-    debug("Waiting!");
-  }
-  //await new Promise((resolve, reject) => setTimeout(resolve, 500));
-}
-function getAllTechnicians(htmlString){
-  var techs = [];
-  for(var tech of techSelectionClass[0].children){
-    var name = tech.innerText;
-    if(!(name=="" || name=="NOTAPPLICABLE")){
-      techs.push(tech.innerText);
+function updatePageMods(){
+  document.dispatchEvent(new CustomEvent('updatePage', 
+    {
+      detail:{
+        'autoMeasurements':settings.autoMeasurements,
+        'autoCloseMeasurements':settings.autoCloseMeasurements
+      }
     }
-  };
-  return techs;
+  ));
 }
-
 async function inject(){
 	var warnUser = autoTechWarn();
 	var changeTech = (settings.autoTech && pageTechIndex !=-1 && autoTechChange());
@@ -165,21 +159,37 @@ async function inject(){
   };
   document.addEventListener('injectionComplete', function (e) {
     injectionComplete = true;
-    debug('Injection Completed!');
+    console.log('Injection Completed!');
   });
   (document.body || document.head || document.documentElement).appendChild(s);
   
   while(!injectionComplete){
     await new Promise((resolve, reject) => setTimeout(resolve, 10));
+    console.log("Waiting for injection code to complete.");
   }
-}
+  console.log("Injection code completed!");
+  
 
 
-function debug(info, obj){
-  if(DEBUG) {
-    console.log(info);
-    if(obj != null){
-      console.log(obj);
-    }
+  function autoTechChange(){
+    var techValue = $('#technicianSelect')[0].selectedOptions[0].innerText;
+    var noTechAssigned = (techValue=="" || techValue=="NOTAPPLICABLE");
+      if(settings.selectedAct == 0)
+      return true;
+    return noTechAssigned;
+  }
+  function autoTechWarn(){
+    console.log($('#technicianSelect')[0].selectedOptions[0].innerText);
+    var techValue = $('#technicianSelect')[0].selectedOptions[0].innerText;
+    var noTechAssigned = techValue==="" || techValue==="NOTAPPLICABLE";
+      console.log(noTechAssigned);
+    if(settings.selectedConf == 0)
+      return false;
+    else if(settings.selectedConf == 1)
+      return !noTechAssigned;
+    return true;
   }
 }
+// $("body").on('DOMNodeRemoved', ".ajaxLoaderOverlay", function(e) {
+//   console.log(e);
+// });
