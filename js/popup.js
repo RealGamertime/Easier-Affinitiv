@@ -2,22 +2,25 @@ import "/js/jquery-3.6.0.min.js";
 
 const debugLoadAutofill = false;
 
-const initInputIds = ['autoTech','selectedAct','selectedConf', 'statusTracker', 'autoCloseMeasurements','autoMeasurements'];
+const initInputIds = ['autoTech','selectedAct','selectedConf', 'statusTracker', 'autoCloseMeasurements','autoMeasurements', 'eV'];
 
 const settings={
-	'selectedTech': null,
+	'selectedTech': [],
 	'autoTech': false,
 	'statusTracker':true,
-	'autoMeasurements':false,
+	'autoMeasurements':true,
 	'autoCloseMeasurements':true,
+  'eV': true,
 	'selectedConf': 0,
 	'selectedAct':0,
-	'availTechs': ["Cosmo Verdi","Dugan Sheridan","HECTOR A OLMEDO","Jesus Rodriguez","KEVIN GILLILAND","Nicholas Carr","Nick Wekell","SEAN M RAGSDALE","TRISTAN SHARP"]
+	'availTechs': {}
 };
 
 if(debugLoadAutofill) window.location.href = './autofill.html';
 
+// Sets up a listener to wait for page load.
 document.addEventListener("DOMContentLoaded", async () =>{
+  // Gets all settings stored in chrome storage.
 	chrome.storage.sync.get(null, async (data) =>{
 		if(Object.keys(data).length === 0){
       //Initilizing settings
@@ -48,7 +51,7 @@ $(':checkbox').on('change', event =>{
 	console.log(event);
 	updateDropDownAccess(event);
 	chrome.storage.sync.set({[event.target.id]:event.target.checked});
-
+  console.log({[event.target.id]:event.target.checked});
 	
 });
 
@@ -83,8 +86,13 @@ function updateDropDownAccess(event) {
 	}
 }
 
-$('select.optionSelection').on('change', event =>{
-	chrome.storage.sync.set({[event.target.id]:event.target.value});
+$('select.optionSelection').on('change', function(event){
+	console.log(event.target.value);
+	console.log(event);
+	if(event.target.id == 'selectedTech')
+	chrome.storage.sync.set({"selectedTech":[event.target.value, settings.availTechs[event.target.value]]});
+	else
+		chrome.storage.sync.set({[event.target.id]:event.target.value});
 });
 document.querySelectorAll(".dropDownOpen").forEach(element=>{
 	// console.log(element);
@@ -117,7 +125,8 @@ function main(){
 }
 
 function loadTechOptions(techs){
-	techs.forEach((tech, index)=>{
+	console.log(techs);
+	Object.keys(techs).forEach((tech, index)=>{
 		var techOption = document.createElement("option");
 		techOption.innerText = tech;
 		techOption.id = index;
@@ -140,13 +149,13 @@ function initSettings(techs){
 			throw new Error(`'${elementType}' is not a user input id.`);
 		}
 	}catch(e){
-		console.warn(`Unable to initilize tag id '${id}'. It is either an invalid id or not an valid input type. \n ${e.message}`);
+		console.warn(`Unable to initilize tag id '${id}'. It is either an invalid id or not a valid input type. \n ${e.message}`);
 	}
 	}
 	loadTechOptions(techs);
-	if(techs.includes(settings.selectedTech)){
+	if(techs[settings.selectedTech[0]] != undefined){
 		// console.log("Selected tech exists.");
-		$('#selectedTech')[0].value =settings.selectedTech;
+		$('#selectedTech')[0].value =settings.selectedTech[0];
 	}
 	else{
 		console.warn(`Selected Technician: ${settings.selectedTech} does not exist.`);

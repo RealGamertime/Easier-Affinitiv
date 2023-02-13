@@ -1,0 +1,56 @@
+[{ 
+  "serviceName":"Engine Air Filter",
+  "mPIDescription":"Engine Air Filter",
+  "quickSelectOption":"Replace Air Filter"
+},{ 
+  "serviceName":"Cabin Air Filter",
+  "mPIDescription":"Cabin Air Filter",
+  "quickSelectOption":"Cabin Air Filter"
+},{ 
+  "serviceName":"Battery Replacement",
+  "mPIDescription":"Battery Performance",
+  "quickSelectOption":"Replace Battery"
+},{ 
+  "serviceName":"Battery Service",
+  "mPIDescription":"Battery Performance",
+  "otherNotes":"Battery Cleaning Service Recommended.",
+  "hours":0.3
+},{ 
+  "serviceName":"Fuel System Cleaning",
+  "mPIDescription":"Fuel System",
+  "quickSelectOption":"Fuel System Cleaning"
+},{
+  "serviceName":"Wiper Blades",
+  "mPIDescription":"Wiper Blades"
+},{
+  "serviceName":"Brake Fluid Flush",
+  "mPIDescription":"Brake Fluid",
+  "quickSelectOption": "Brake System"
+},{
+  "serviceName":"Coolant Flush",
+  "mPIDescription": "Cooling System",
+  "quickSelectOption":"Cooling System"
+},{
+  "serviceName":"Power Steering Flush",
+  "mPIDescription":"Power Steering Fluid",
+  "quickSelectOption":"Power Steering Fluid"
+},{ 
+  "serviceName":"4x4 Service",
+  "mPIDescription":"Transmission, U-Joints",
+  "otherNotes":"4x4 Service Recommended.",
+  "hours":1.5
+},{
+  "serviceName":"Auto Transmission Flush",
+  "mPIDescription":"Transmission, U-Joints",
+  "quickSelectOption":"Automatic"
+},{
+  "serviceName": "4 Wheel Alignment",
+  "mPIDescription": "Drive Shaft/CV Boots",
+  "quickSelectOption": "4 Wheel"
+},{
+  "serviceName": "Green Everything Else",
+  "mPIDescription": "autoGreen"
+},{
+  "serviceName": "Skip Everything Else",
+  "mPIDescription": "autoSkip"
+}]

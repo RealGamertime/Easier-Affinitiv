@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "type": "devtools-for-chrome",
+          "request": "launch",
+          "name": "Attach Chrome DevTools",
+          "url": "https://autoloop.us/dms/app/Schedule/MPI/Inspection/Details.aspx?inspectionId=3d720de8-2e4b-ed11-8379-00155dbf760b"
+      }
+  ]
+}
